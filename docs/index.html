@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FlyRank ML Internship — Capstone</title>
+
+    <meta
+        name="description"
+        content="Machine-learning prioritization of content pages for human review — FlyRank ML Internship capstone."
+    >
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy-900: #0b2338;
+            --navy-800: #102f4a;
+            --navy-700: #1e3a5f;
+            --blue-600: #2563eb;
+            --blue-700: #1d4ed8;
+            --blue-50: #eff6ff;
+            --paper: #f7f5f0;
+            --paper-card: #ffffff;
+            --ink: #1c2430;
+            --muted: #5b6472;
+            --line: #e3ded2;
+            --line-soft: #ece7db;
+            --success: #16a34a;
+            --success-bg: #f0fdf4;
+            --warn: #b8590a;
+            --warn-bg: #fdf3e8;
+            --model: #2563eb;
+            --baseline: #94a3b8;
+            --share-bg: #eef1fb;
+            --share-line: #c9d3f2;
+            --radius: 14px;
+            --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+            --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--sans);
+            font-size: 17px;
+            line-height: 1.7;
+            color: var(--ink);
+            background: var(--paper);
+        }
+
+        a {
+            color: var(--blue-600);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        a:focus-visible,
+        button:focus-visible,
+        summary:focus-visible {
+            outline: 2px solid var(--blue-600);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -999px;
+            top: auto;
+            background: var(--navy-900);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            z-index: 100;
+        }
+
+        .skip-link:focus {
+            left: 16px;
+            top: 16px;
+        }
+
+        img, svg {
+            max-width: 100%;
+        }
+
+        /* ---------- Hero ---------- */
+
+        .hero {
+            background: linear-gradient(180deg, var(--navy-900) 0%, var(--navy-800) 100%);
+            color: white;
+            padding: 76px 24px 64px;
+            border-bottom: 4px solid var(--blue-600);
+        }
+
+        .hero-inner {
+            max-width: 1160px;
+            margin: auto;
+        }
+
+        .hero .eyebrow {
+            color: #93c5fd;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 {
+            font-family: var(--serif);
+            font-weight: 600;
+            font-size: clamp(2rem, 4.4vw, 3.4rem);
+            line-height: 1.2;
+            max-width: 880px;
+            margin-bottom: 22px;
+            letter-spacing: -0.01em;
+        }
+
+        .hero .subtitle {
+            font-size: 1.2rem;
+            color: #dbeafe;
+            margin-bottom: 22px;
+        }
+
+        .hero .meta {
+            color: #a9c4e8;
+            font-size: 0.98rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+        }
+
+        .hero .meta span {
+            white-space: nowrap;
+        }
+
+        .hero .meta span:not(:last-child)::after {
+            content: "";
+        }
+
+        /* ---------- Layout: sidebar + content ---------- */
+
+        .layout {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 240px minmax(0, 1fr);
+            gap: 40px;
+            align-items: start;
+        }
+
+        .toc-desktop {
+            position: sticky;
+            top: 24px;
+            align-self: start;
+            padding: 22px 0 22px 4px;
+            font-size: 0.94rem;
+        }
+
+        .toc-desktop h2 {
+            font-family: var(--sans);
+            font-size: 0.8rem;
+            text-transform: none;
+            color: var(--muted);
+            border: none;
+            padding: 0 0 10px;
+            margin: 0 0 6px;
+            font-weight: 600;
+        }
+
+        .toc-desktop ol {
+            list-style: none;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .toc-desktop li a {
+            display: block;
+            color: var(--navy-700);
+            padding: 6px 10px;
+            border-radius: 8px;
+            border-left: 2px solid transparent;
+        }
+
+        .toc-desktop li a:hover {
+            background: var(--blue-50);
+            text-decoration: none;
+            border-left-color: var(--blue-600);
+        }
+
+        .toc-desktop .toc-divider {
+            margin: 14px 0 8px;
+            padding-top: 12px;
+            border-top: 1px solid var(--line);
+            font-size: 0.78rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .toc-mobile {
+            display: none;
+        }
+
+        /* ---------- Main content ---------- */
+
+        main {
+            padding: 24px 0 80px;
+        }
+
+        section.card,
+        div.card {
+            background: var(--paper-card);
+            border: 1px solid var(--line-soft);
+            border-radius: var(--radius);
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+            scroll-margin-top: 20px;
+        }
+
+        h2 {
+            font-family: var(--serif);
+            font-weight: 600;
+            font-size: 1.7rem;
+            color: var(--navy-900);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--line);
+            letter-spacing: -0.005em;
+        }
+
+        h3 {
+            font-family: var(--serif);
+            font-weight: 600;
+            font-size: 1.18rem;
+            color: var(--navy-700);
+            margin: 26px 0 10px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            max-width: 72ch;
+        }
+
+        ul, ol {
+            margin: 12px 0 18px 25px;
+            max-width: 72ch;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .abstract {
+            font-size: 1.08rem;
+        }
+
+        .highlight {
+            background: var(--blue-50);
+            border-left: 4px solid var(--blue-600);
+            padding: 18px 20px;
+            border-radius: 8px;
+            margin: 22px 0;
+        }
+
+        .warning {
+            background: var(--warn-bg);
+            border-left: 4px solid var(--warn);
+            padding: 18px 20px;
+            border-radius: 8px;
+            margin: 22px 0;
+        }
+
+        .success {
+            background: var(--success-bg);
+            border-left: 4px solid var(--success);
+            padding: 18px 20px;
+            border-radius: 8px;
+            margin: 22px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.96rem;
+        }
+
+        th, td {
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+        }
+
+        th {
+            background: #faf8f3;
+            color: var(--navy-900);
+            font-weight: 600;
+        }
+
+        tr:hover td {
+            background: #faf8f3;
+        }
+
+        code {
+            background: #f1ede2;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        /* ---------- Metric grid (quick highlight) ---------- */
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 25px 0;
+        }
+
+        .metric {
+            background: #faf8f3;
+            border-radius: 12px;
+            padding: 20px 22px;
+            border: 1px solid var(--line-soft);
+        }
+
+        .metric.is-model {
+            border-color: #bfd4fb;
+            background: var(--blue-50);
+        }
+
+        .metric .number {
+            font-family: var(--serif);
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--blue-600);
+        }
+
+        .metric.is-model .number {
+            color: var(--blue-700);
+        }
+
+        .metric:not(.is-model) .number {
+            color: var(--navy-700);
+        }
+
+        .metric .label {
+            color: var(--muted);
+            font-size: 0.94rem;
+            margin-top: 2px;
+        }
+
+        /* ---------- Results: model vs. baseline bars ---------- */
+
+        .compare-block {
+            border: 1px solid var(--line-soft);
+            border-radius: 12px;
+            padding: 22px 24px;
+            margin: 22px 0;
+            background: #fdfcf9;
+        }
+
+        .compare-block h3 {
+            margin-top: 0;
+        }
+
+        .bar-row {
+            display: grid;
+            grid-template-columns: 150px 1fr 64px;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .bar-row .bar-label {
+            font-size: 0.92rem;
+            color: var(--navy-700);
+        }
+
+        .bar-track {
+            background: #edeade;
+            border-radius: 999px;
+            height: 14px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 999px;
+        }
+
+        .bar-fill.model {
+            background: var(--model);
+        }
+
+        .bar-fill.baseline {
+            background: var(--baseline);
+        }
+
+        .bar-row .bar-value {
+            font-weight: 600;
+            font-size: 0.92rem;
+            text-align: right;
+            color: var(--navy-900);
+        }
+
+        .legend {
+            display: flex;
+            gap: 18px;
+            font-size: 0.88rem;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .legend .dot.model { background: var(--model); }
+        .legend .dot.baseline { background: var(--baseline); }
+
+        /* ---------- Timeline ---------- */
+
+        .timeline {
+            display: grid;
+            gap: 14px;
+        }
+
+        .week {
+            display: flex;
+            gap: 18px;
+            padding: 18px;
+            border: 1px solid var(--line-soft);
+            border-radius: 12px;
+            background: #fdfcf9;
+            align-items: flex-start;
+        }
+
+        .week-number {
+            min-width: 66px;
+            font-weight: 600;
+            color: var(--blue-600);
+            font-family: var(--serif);
+        }
+
+        .week-content strong {
+            color: var(--navy-900);
+        }
+
+        /* ---------- Action playbook cards ---------- */
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin: 22px 0 28px;
+        }
+
+        .action-card {
+            border-radius: 12px;
+            padding: 18px 18px 20px;
+            border: 1px solid var(--line-soft);
+            border-top: 4px solid var(--action-color, var(--blue-600));
+            background: #fdfcf9;
+        }
+
+        .action-card .action-name {
+            font-weight: 600;
+            color: var(--navy-900);
+            margin-bottom: 10px;
+        }
+
+        .action-card .action-count {
+            font-family: var(--serif);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--navy-900);
+        }
+
+        .action-card .action-share {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .action-card.refresh { --action-color: #2563eb; }
+        .action-card.review { --action-color: #b8590a; }
+        .action-card.quickwin-refresh { --action-color: #0d9488; }
+        .action-card.quickwin { --action-color: #16a34a; }
+
+        .action-total {
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        /* ---------- Buttons ---------- */
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .button {
+            display: inline-block;
+            background: var(--blue-600);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            background: var(--blue-700);
+            text-decoration: none;
+        }
+
+        .button.secondary {
+            background: #eae5d8;
+            color: var(--ink);
+        }
+
+        .button.secondary:hover {
+            background: #ddd6c4;
+        }
+
+        /* ---------- Capstone quick-links strip ---------- */
+
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px 20px;
+            padding: 20px 40px;
+            border: 1px dashed var(--line);
+            border-radius: var(--radius);
+            margin-bottom: 32px;
+            background: #fbfaf6;
+        }
+
+        .quick-links p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+            max-width: none;
+        }
+
+        /* ---------- Presentation & Sharing group ---------- */
+
+        .share-group {
+            background: var(--share-bg);
+            border: 1px solid var(--share-line);
+            border-radius: 18px;
+            padding: 8px 8px 20px;
+            margin-top: 12px;
+        }
+
+        .share-group-intro {
+            padding: 26px 32px 10px;
+        }
+
+        .share-group-intro .eyebrow {
+            color: var(--navy-700);
+            font-weight: 600;
+            font-size: 0.88rem;
+            margin-bottom: 8px;
+        }
+
+        .share-group-intro h2 {
+            border: none;
+            padding: 0;
+            margin-bottom: 8px;
+        }
+
+        .share-group-intro p {
+            color: var(--navy-700);
+            max-width: 68ch;
+        }
+
+        .share-group .card {
+            background: #fdfdfb;
+            margin: 12px 24px;
+            box-shadow: none;
+        }
+
+        @media (max-width: 640px) {
+            .share-group .card {
+                margin: 12px 12px;
+            }
+        }
+
+        .copy-note {
+            display: inline-block;
+            font-size: 0.82rem;
+            color: var(--muted);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 3px 10px;
+            margin-bottom: 14px;
+        }
+
+        /* ---------- Footer ---------- */
+
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            padding: 30px 20px 50px;
+        }
+
+        .footer p {
+            max-width: none;
+        }
+
+        /* ---------- Responsive ---------- */
+
+        @media (max-width: 980px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .toc-desktop {
+                display: none;
+            }
+
+            .toc-mobile {
+                display: block;
+                margin: 20px 0 4px;
+                border: 1px solid var(--line-soft);
+                border-radius: 12px;
+                background: var(--paper-card);
+                padding: 4px 18px;
+            }
+
+            .toc-mobile summary {
+                cursor: pointer;
+                padding: 12px 0;
+                font-weight: 600;
+                color: var(--navy-900);
+                list-style: none;
+            }
+
+            .toc-mobile summary::-webkit-details-marker {
+                display: none;
+            }
+
+            .toc-mobile summary::after {
+                content: "▾";
+                float: right;
+                color: var(--muted);
+            }
+
+            .toc-mobile[open] summary::after {
+                content: "▴";
+            }
+
+            .toc-mobile ol {
+                list-style: none;
+                margin: 0 0 14px;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .toc-mobile li a {
+                display: block;
+                padding: 8px 6px;
+                border-radius: 8px;
+                color: var(--navy-700);
+            }
+
+            .toc-mobile .toc-divider {
+                margin: 10px 0 6px;
+                padding-top: 10px;
+                border-top: 1px solid var(--line);
+                font-size: 0.78rem;
+                color: var(--muted);
+                font-weight: 600;
+            }
+
+            .action-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .hero {
+                padding: 52px 20px 44px;
+            }
+
+            section.card,
+            div.card {
+                padding: 24px;
+            }
+
+            .layout {
+                padding: 0 16px;
+            }
+
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bar-row {
+                grid-template-columns: 100px 1fr 54px;
+            }
+
+            .week {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-links {
+                padding: 18px 22px;
+            }
+
+            .share-group-intro {
+                padding: 22px 20px 6px;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header class="hero">
+    <div class="hero-inner">
+        <div class="eyebrow">FlyRank Machine Learning Internship</div>
+
+        <h1>
+            Machine-Learning Prioritization of Content Pages for Human Review
+        </h1>
+
+        <div class="subtitle">
+            A FlyRank Machine Learning Internship Capstone
+        </div>
+
+        <div class="meta">
+            <span>March 2026 feature window</span>
+            <span>· April 2026 evaluation outcome</span>
+            <span>· 5-fold client-grouped validation</span>
+        </div>
+    </div>
+</header>
+
+<div class="layout">
+
+    <nav class="toc-desktop" aria-label="Table of contents">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#abstract">Abstract</a></li>
+            <li><a href="#intro">1. Introduction</a></li>
+            <li><a href="#journey">2. Internship Journey</a></li>
+            <li><a href="#data">3. Data</a></li>
+            <li><a href="#methodology">4. Methodology</a></li>
+            <li><a href="#results">5. Results</a></li>
+            <li><a href="#limitations">6. Limitations</a></li>
+            <li><a href="#recommendations">7. Recommendations</a></li>
+            <li><a href="#reproducibility">8. Reproducibility</a></li>
+            <li><a href="#acknowledgments">9. Acknowledgments</a></li>
+        </ol>
+        <div class="toc-divider">Presentation &amp; Sharing</div>
+        <ol>
+            <li><a href="#demo-outline">Demo Outline</a></li>
+            <li><a href="#social-post">Social-Post Cut</a></li>
+            <li><a href="#employer-summary">Employer Summary</a></li>
+        </ol>
+    </nav>
+
+    <main id="main-content">
+
+        <details class="toc-mobile">
+            <summary>Contents</summary>
+            <ol>
+                <li><a href="#abstract">Abstract</a></li>
+                <li><a href="#intro">1. Introduction</a></li>
+                <li><a href="#journey">2. Internship Journey</a></li>
+                <li><a href="#data">3. Data</a></li>
+                <li><a href="#methodology">4. Methodology</a></li>
+                <li><a href="#results">5. Results</a></li>
+                <li><a href="#limitations">6. Limitations</a></li>
+                <li><a href="#recommendations">7. Recommendations</a></li>
+                <li><a href="#reproducibility">8. Reproducibility</a></li>
+                <li><a href="#acknowledgments">9. Acknowledgments</a></li>
+            </ol>
+            <div class="toc-divider">Presentation &amp; Sharing</div>
+            <ol>
+                <li><a href="#demo-outline">Demo Outline</a></li>
+                <li><a href="#social-post">Social-Post Cut</a></li>
+                <li><a href="#employer-summary">Employer Summary</a></li>
+            </ol>
+        </details>
+
+        <!-- ABSTRACT -->
+        <section class="card" id="abstract" aria-labelledby="abstract-h">
+            <h2 id="abstract-h">Abstract</h2>
+
+            <p class="abstract">
+                This paper asks whether a simple machine-learning model can help
+                prioritize which content pages should be reviewed first using
+                information available up to the end of March 2026.
+                The analysis uses March 2026 performance signals and content age
+                to rank pages, with positive movement defined as April 2026
+                impressions being greater than March 2026 impressions.
+                Logistic Regression is compared with the Week-4 baseline action
+                score using 5-fold client-grouped validation to reduce leakage
+                between clients.
+                Across the validation folds, Logistic Regression measured
+                <strong>48.0% Precision@20</strong> and
+                <strong>46.8% Precision@50</strong>, compared with
+                <strong>36.0%</strong> and <strong>36.4%</strong> for the
+                Week-4 baseline.
+                These results are observed performance on the internship dataset
+                and support using the model as decision-support for human review,
+                rather than as proof that recommended content changes will improve
+                future performance.
+            </p>
+        </section>
+
+        <!-- INTRODUCTION -->
+        <section class="card" id="intro" aria-labelledby="intro-h">
+            <h2 id="intro-h">1. Introduction / Problem Statement</h2>
+
+            <p>
+                Content teams often have more pages to review than they can
+                realistically inspect at the same time. A useful ranking system
+                can help reviewers decide which pages deserve attention first
+                using signals that were already available at the time of the
+                decision.
+            </p>
+
+            <p>
+                This project asks whether a simple machine-learning model can
+                improve that prioritization compared with a transparent,
+                rule-based baseline.
+            </p>
+
+            <p>
+                The decision point is the end of March 2026. The model therefore
+                uses information available through March 31, including March
+                performance signals and content age.
+            </p>
+
+            <div class="highlight">
+                <strong>Research question:</strong>
+                Can a simple machine-learning model help prioritize which content
+                pages should be reviewed first, using information available up to
+                the end of March 2026?
+            </div>
+
+            <p>
+                The task is framed as ranking rather than automatic optimization.
+                The model estimates the probability of positive movement and uses
+                that probability to prioritize pages for human review.
+            </p>
+
+            <p>
+                Positive movement is defined as April 2026 impressions being
+                greater than March 2026 impressions.
+            </p>
+        </section>
+
+        <!-- INTERNSHIP JOURNEY -->
+        <section class="card" id="journey" aria-labelledby="journey-h">
+            <h2 id="journey-h">2. Internship Journey</h2>
+
+            <p>
+                The capstone builds on the work completed throughout the FlyRank
+                Machine Learning Internship. Each stage added another part of the
+                final workflow: problem framing, data contracts, signal analysis,
+                baseline construction, modeling, validation, and decision-support
+                recommendations.
+            </p>
+
+            <div class="timeline">
+
+                <div class="week">
+                    <div class="week-number">Week 1</div>
+                    <div class="week-content">
+                        <strong>ML-02 — Research Question</strong>
+                        <p>
+                            Framed the real-world content problem as a measurable
+                            machine-learning research question.
+                        </p>
+                        <a href="https://colab.research.google.com/github/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/w01_research_question.ipynb"
+                           target="_blank">
+                            Open notebook →
+                        </a>
+                    </div>
+                </div>
+
+                <div class="week">
+                    <div class="week-number">Week 2</div>
+                    <div class="week-content">
+                        <strong>ML-03 — ML Task Framing</strong>
+                        <p>
+                            Defined the prediction and ranking problem, decision
+                            context, and what the model should and should not
+                            claim.
+                        </p>
+                        <a href="https://colab.research.google.com/github/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/w02_ml_task_framing.ipynb"
+                           target="_blank">
+                            Open notebook →
+                        </a>
+                    </div>
+                </div>
+
+                <div class="week">
+                    <div class="week-number">Week 3</div>
+                    <div class="week-content">
+                        <strong>ML-04 — Data Contract</strong>
+                        <p>
+                            Defined the data grain, feature window, decision
+                            cutoff, candidate features, and leakage boundaries
+                            for the warehouse analysis.
+                        </p>
+                        <a href="https://colab.research.google.com/github/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/w03_data_contract.ipynb"
+                           target="_blank">
+                            Data contract →
+                        </a>
+                        <br>
+                        <a href="https://colab.research.google.com/github/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/w03_feature_leakage_check.ipynb"
+                           target="_blank">
+                            Feature leakage check →
+                        </a>
+                    </div>
+                </div>
+
+                <div class="week">
+                    <div class="week-number">Week 4</div>
+                    <div class="week-content">
+                        <strong>ML-06 / ML-07 — Signal Audit &amp; Baseline</strong>
+                        <p>
+                            Tested directional signals and built the transparent
+                            Week-4 baseline action score and ranked queue.
+                        </p>
+                        <a href="https://colab.research.google.com/github/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/w04_signal_audit.ipynb"
+                           target="_blank">
+                            Signal audit →
+                        </a>
+                        <br>
+                        <a href="https://colab.research.google.com/github/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/w04_baseline_score.ipynb"
+                           target="_blank">
+                            Baseline score →
+                        </a>
+                    </div>
+                </div>
+
+                <div class="week">
+                    <div class="week-number">Week 5</div>
+                    <div class="week-content">
+                        <strong>ML-08 — Logistic Regression Model</strong>
+                        <p>
+                            Built the first learned ranking model and compared it
+                            against the Week-4 baseline using Precision@20 and
+                            Precision@50.
+                        </p>
+                        <a href="https://colab.research.google.com/github/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/w05_model.ipynb"
+                           target="_blank">
+                            Open notebook →
+                        </a>
+                    </div>
+                </div>
+
+                <div class="week">
+                    <div class="week-number">Week 6</div>
+                    <div class="week-content">
+                        <strong>ML-09 — Validation &amp; Research Claim Audit</strong>
+                        <p>
+                            Strengthened validation using 5-fold client-grouped
+                            validation and audited leakage and research claims.
+                        </p>
+                        <a href="https://colab.research.google.com/github/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/w06_validation_audit.ipynb"
+                           target="_blank">
+                            Open notebook →
+                        </a>
+                    </div>
+                </div>
+
+                <div class="week">
+                    <div class="week-number">Week 7</div>
+                    <div class="week-content">
+                        <strong>ML-10 — Ranked Action Playbook</strong>
+                        <p>
+                            Converted model output into a practical ranked action
+                            playbook for human review.
+                        </p>
+                        <a href="https://colab.research.google.com/github/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/w07_action_playbook.ipynb"
+                           target="_blank">
+                            Open notebook →
+                        </a>
+                    </div>
+                </div>
+
+                <div class="week">
+                    <div class="week-number">Week 8</div>
+                    <div class="week-content">
+                        <strong>ML-11 / ML-12 — Capstone &amp; Storytelling</strong>
+                        <p>
+                            Assembled the research paper, public artifact,
+                            recommendations, demo outline, social-post cut,
+                            and employer-facing summary.
+                        </p>
+                        <a href="https://colab.research.google.com/github/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/capstone.ipynb"
+                           target="_blank">
+                            Open capstone →
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- DATA -->
+        <section class="card" id="data" aria-labelledby="data-h">
+            <h2 id="data-h">3. Data</h2>
+
+            <p>
+                This analysis uses the FlyRank internship warehouse data available
+                at the end of March 2026.
+            </p>
+
+            <p>
+                The main performance data comes from
+                <code>fact_content_daily_performance/**/*.parquet</code>.
+                Content metadata comes from
+                <code>dim_content.parquet</code>.
+            </p>
+
+            <h3>Feature window</h3>
+
+            <ul>
+                <li><strong>Feature window:</strong> March 1–31, 2026</li>
+                <li><strong>Decision cutoff:</strong> March 31, 2026</li>
+                <li><strong>Evaluation window:</strong> April 2026</li>
+                <li><strong>Evaluation outcome:</strong> April impressions &gt; March impressions</li>
+            </ul>
+
+            <p>
+                March performance and content age are used as model inputs.
+                April impressions are used only to define the observed evaluation
+                outcome and are not used as an input feature.
+            </p>
+
+            <div class="warning">
+                <strong>Public-safety boundary:</strong>
+                No client names, URLs, search queries, or other private client
+                information are exposed in this paper.
+            </div>
+        </section>
+
+        <!-- METHODOLOGY -->
+        <section class="card" id="methodology" aria-labelledby="methodology-h">
+            <h2 id="methodology-h">4. Methodology</h2>
+
+            <h3>Model features</h3>
+
+            <ul>
+                <li>March impressions</li>
+                <li>March clicks</li>
+                <li>March average position</li>
+                <li>March GA4 sessions</li>
+                <li>March GA4 engaged sessions</li>
+                <li>March CTR</li>
+                <li>Content age in days</li>
+            </ul>
+
+            <h3>Observed outcome</h3>
+
+            <p>
+                Positive movement is defined as:
+            </p>
+
+            <div class="highlight">
+                <strong>April 2026 impressions &gt; March 2026 impressions</strong>
+            </div>
+
+            <p>
+                This is an observed future outcome used for evaluation. It is not
+                available to the model at the March 31 decision cutoff.
+            </p>
+
+            <h3>Baseline</h3>
+
+            <p>
+                The Week-4 baseline is a transparent action score based on March
+                impressions and content age. It provides a simple reference point
+                against which the learned model can be evaluated.
+            </p>
+
+            <h3>Model</h3>
+
+            <p>
+                Logistic Regression is used as a ranking model. Pages are ranked
+                by the model's predicted probability of positive movement.
+            </p>
+
+            <h3>Validation</h3>
+
+            <p>
+                The analysis uses 5-fold GroupKFold validation grouped by client.
+                All rows belonging to the same client remain within either the
+                training or validation fold. This evaluates ranking performance
+                across unseen client groups rather than randomly mixing pages from
+                the same client.
+            </p>
+
+            <h3>Leakage controls</h3>
+
+            <ul>
+                <li>April outcome fields are excluded from model inputs.</li>
+                <li>Future product-decision fields are excluded.</li>
+                <li>Client names and private information are excluded.</li>
+                <li>URLs and private search queries are excluded.</li>
+                <li>The decision cutoff is March 31, 2026.</li>
+            </ul>
+        </section>
+
+        <!-- RESULTS -->
+        <section class="card" id="results" aria-labelledby="results-h">
+            <h2 id="results-h">5. Results</h2>
+
+            <p>
+                Logistic Regression was evaluated against the same Week-4
+                baseline using the same client-grouped validation design.
+            </p>
+
+            <div class="metric-grid">
+                <div class="metric is-model">
+                    <div class="number">48.0%</div>
+                    <div class="label">Logistic Regression Precision@20</div>
+                </div>
+
+                <div class="metric">
+                    <div class="number">36.0%</div>
+                    <div class="label">Week-4 Baseline Precision@20</div>
+                </div>
+
+                <div class="metric is-model">
+                    <div class="number">46.8%</div>
+                    <div class="label">Logistic Regression Precision@50</div>
+                </div>
+
+                <div class="metric">
+                    <div class="number">36.4%</div>
+                    <div class="label">Week-4 Baseline Precision@50</div>
+                </div>
+            </div>
+
+            <div class="compare-block">
+                <h3>Precision@20</h3>
+                <div class="bar-row">
+                    <span class="bar-label">Logistic Regression</span>
+                    <span class="bar-track"><span class="bar-fill model" style="width:48%"></span></span>
+                    <span class="bar-value">48.0%</span>
+                </div>
+                <div class="bar-row">
+                    <span class="bar-label">Week-4 baseline</span>
+                    <span class="bar-track"><span class="bar-fill baseline" style="width:36%"></span></span>
+                    <span class="bar-value">36.0%</span>
+                </div>
+
+                <h3>Precision@50</h3>
+                <div class="bar-row">
+                    <span class="bar-label">Logistic Regression</span>
+                    <span class="bar-track"><span class="bar-fill model" style="width:46.8%"></span></span>
+                    <span class="bar-value">46.8%</span>
+                </div>
+                <div class="bar-row">
+                    <span class="bar-label">Week-4 baseline</span>
+                    <span class="bar-track"><span class="bar-fill baseline" style="width:36.4%"></span></span>
+                    <span class="bar-value">36.4%</span>
+                </div>
+
+                <div class="legend" aria-hidden="true">
+                    <span><span class="dot model"></span>Logistic Regression</span>
+                    <span><span class="dot baseline"></span>Week-4 baseline</span>
+                </div>
+            </div>
+
+            <table>
+                <caption class="visually-hidden" style="position:absolute;left:-9999px;">Precision@20 and Precision@50 for Logistic Regression versus the Week-4 baseline</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Method</th>
+                        <th scope="col">Precision@20</th>
+                        <th scope="col">Precision@50</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>Week-4 baseline</td>
+                        <td>36.0%</td>
+                        <td>36.4%</td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Logistic Regression</strong></td>
+                        <td><strong>48.0%</strong></td>
+                        <td><strong>46.8%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="success">
+                <strong>Observed result:</strong>
+                Logistic Regression produced higher Precision@20 and Precision@50
+                than the Week-4 baseline across the 5 validation folds.
+            </div>
+
+            <p>
+                The improvement supports the use of the learned ranking signal as
+                decision-support evidence on this dataset. It does not establish
+                that the model will improve page performance after content changes.
+            </p>
+        </section>
+
+        <!-- LIMITATIONS -->
+        <section class="card" id="limitations" aria-labelledby="limitations-h">
+            <h2 id="limitations-h">6. Limitations &amp; Honest Framing</h2>
+
+            <ul>
+                <li>
+                    The analysis is based on one March feature window and April
+                    evaluation window.
+                </li>
+
+                <li>
+                    Positive movement is an observed outcome, not a causal measure
+                    of whether a content change caused improvement.
+                </li>
+
+                <li>
+                    A high model score does not guarantee positive future movement.
+                </li>
+
+                <li>
+                    A page with a low score may still deserve review for reasons
+                    not represented in the available features.
+                </li>
+
+                <li>
+                    Client-grouped validation improves the evaluation design, but
+                    it does not eliminate all sources of uncertainty.
+                </li>
+
+                <li>
+                    The results should be interpreted as measured,
+                    observational, directional, decision-support evidence.
+                </li>
+            </ul>
+
+            <div class="warning">
+                <strong>Important:</strong>
+                The model should support human review, not automatically change
+                content or claim to predict Google's ranking algorithm.
+            </div>
+        </section>
+
+        <!-- RECOMMENDATIONS -->
+        <section class="card" id="recommendations" aria-labelledby="recommendations-h">
+            <h2 id="recommendations-h">7. Ranked Recommendations / Action Playbook</h2>
+
+            <p>
+                The model output is converted into a ranked action playbook.
+                The purpose is to help reviewers decide what to inspect first.
+            </p>
+
+            <p class="action-total">Total ranked pages: <strong>176,737</strong></p>
+
+            <div class="action-grid">
+                <div class="action-card refresh">
+                    <div class="action-name">Refresh</div>
+                    <div class="action-count">59,363</div>
+                    <div class="action-share">33.59% of pages</div>
+                </div>
+
+                <div class="action-card review">
+                    <div class="action-name">Model review</div>
+                    <div class="action-count">56,751</div>
+                    <div class="action-share">32.11% of pages</div>
+                </div>
+
+                <div class="action-card quickwin-refresh">
+                    <div class="action-name">Quick win + Refresh</div>
+                    <div class="action-count">33,768</div>
+                    <div class="action-share">19.11% of pages</div>
+                </div>
+
+                <div class="action-card quickwin">
+                    <div class="action-name">Quick win</div>
+                    <div class="action-count">28,855</div>
+                    <div class="action-share">15.19% of pages</div>
+                </div>
+            </div>
+
+            <table>
+                <caption class="visually-hidden" style="position:absolute;left:-9999px;">Ranked action playbook: page counts and share by action category</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Action</th>
+                        <th scope="col">Pages</th>
+                        <th scope="col">Share</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>Refresh</td>
+                        <td>59,363</td>
+                        <td>33.59%</td>
+                    </tr>
+
+                    <tr>
+                        <td>Model review</td>
+                        <td>56,751</td>
+                        <td>32.11%</td>
+                    </tr>
+
+                    <tr>
+                        <td>Quick win + Refresh</td>
+                        <td>33,768</td>
+                        <td>19.11%</td>
+                    </tr>
+
+                    <tr>
+                        <td>Quick win</td>
+                        <td>28,855</td>
+                        <td>15.19%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Recommended workflow</h3>
+
+            <ol>
+                <li>Start with the highest-ranked pages.</li>
+                <li>Inspect the page and its surrounding evidence.</li>
+                <li>Use the action category as a review priority, not an automatic instruction.</li>
+                <li>Make content decisions through human review.</li>
+                <li>Measure subsequent performance before concluding that an intervention worked.</li>
+            </ol>
+        </section>
+
+        <!-- REPRODUCIBILITY -->
+        <section class="card" id="reproducibility" aria-labelledby="reproducibility-h">
+            <h2 id="reproducibility-h">8. Reproducibility</h2>
+
+            <p>
+                The analysis was developed in the public FlyRank ML internship
+                repository. The workflow is organized across the internship
+                notebooks, with the capstone notebook assembling the final
+                research paper and results.
+            </p>
+
+            <p>
+                The repository contains the notebooks and analysis code needed to
+                reproduce the workflow. Public outputs avoid exposing client
+                names, URLs, search queries, or other private client information.
+            </p>
+
+            <div class="button-row">
+                <a class="button"
+                   href="https://github.com/lakeshkumarkhatri/flyrank-ml"
+                   target="_blank">
+                    GitHub Repository
+                </a>
+
+                <a class="button secondary"
+                   href="https://github.com/lakeshkumarkhatri/flyrank-ml/blob/main/work/notebooks/capstone.ipynb"
+                   target="_blank">
+                    Capstone Notebook
+                </a>
+
+                <a class="button secondary"
+                   href="flyrank-seo-research-march-2026.pdf"
+                   target="_blank">
+                    Research PDF
+                </a>
+            </div>
+        </section>
+
+        <!-- ACKNOWLEDGMENTS -->
+        <section class="card" id="acknowledgments" aria-labelledby="acknowledgments-h">
+            <h2 id="acknowledgments-h">9. Acknowledgments &amp; Data Credit</h2>
+
+            <p>
+                This work was completed as part of the
+                <strong>FlyRank Machine Learning Internship</strong>.
+            </p>
+
+            <p>
+                The analysis is built on the FlyRank ML Internship dataset and the
+                internship's provided research and engineering workflow.
+            </p>
+
+            <p>
+                Data credit:
+                <a href="https://flyrank.ai" target="_blank">
+                    FlyRank
+                </a>
+            </p>
+
+            <p>
+                The analysis and recommendations in this paper are the author's
+                work based on the provided internship dataset. The findings are
+                presented as measured, observational decision-support evidence and
+                should not be interpreted as causal proof.
+            </p>
+        </section>
+
+        <!-- CAPSTONE ARTIFACTS (quick links strip) -->
+        <div class="quick-links" aria-label="Capstone artifacts">
+            <p>The complete internship workflow and final capstone are available in the repository.</p>
+            <a class="button secondary" href="https://github.com/lakeshkumarkhatri/flyrank-ml" target="_blank">
+                View GitHub
+            </a>
+            <a class="button secondary" href="https://github.com/lakeshkumarkhatri/flyrank-ml/tree/main/work/notebooks" target="_blank">
+                View All Notebooks
+            </a>
+        </div>
+
+        <!-- PRESENTATION & SHARING -->
+        <div class="share-group">
+            <div class="share-group-intro">
+                <div class="eyebrow">Presentation &amp; Sharing</div>
+                <h2 id="presentation-h">ML-12 Communication Material</h2>
+                <p>
+                    The three items below summarize the research above for
+                    different audiences — a live demo, a short social post, and
+                    an employer-facing summary. They are communication material,
+                    not additional findings, and reuse the same results reported
+                    in Section 5.
+                </p>
+            </div>
+
+            <section class="card" id="demo-outline" aria-labelledby="demo-outline-h">
+                <span class="copy-note">For a live walkthrough</span>
+                <h2 id="demo-outline-h">ML-12 — 5-Minute Demo Outline</h2>
+
+                <ol>
+                    <li>
+                        <strong>Problem (1 min):</strong>
+                        Explain the goal of prioritizing content pages for human
+                        review using information available by March 31, 2026.
+                    </li>
+
+                    <li>
+                        <strong>Data &amp; methodology (1 min):</strong>
+                        Show the March feature window, April evaluation outcome,
+                        Logistic Regression model, Week-4 baseline, and
+                        client-grouped validation.
+                    </li>
+
+                    <li>
+                        <strong>Results (1 min):</strong>
+                        Compare Logistic Regression with the Week-4 baseline using
+                        Precision@20 and Precision@50.
+                    </li>
+
+                    <li>
+                        <strong>Recommendations (1 min):</strong>
+                        Show the ranked action playbook and its aggregate distribution
+                        across Refresh, Model review, Quick win + Refresh, and
+                        Quick win.
+                    </li>
+
+                    <li>
+                        <strong>Limitations &amp; takeaway (1 min):</strong>
+                        Explain that the results are observational decision-support
+                        evidence, not causal proof, and that human review remains
+                        necessary before making content changes.
+                    </li>
+                </ol>
+            </section>
+
+            <section class="card" id="social-post" aria-labelledby="social-post-h">
+                <span class="copy-note">Ready to copy and share</span>
+                <h2 id="social-post-h">ML-12 — Social-Post Cut</h2>
+
+                <p>
+                    I completed my FlyRank ML internship capstone on using machine
+                    learning to prioritize content pages for human review.
+                </p>
+
+                <p>
+                    The project compares a Logistic Regression ranking model with a
+                    simple Week-4 baseline using March 2026 performance signals and
+                    content age. With 5-fold client-grouped validation, the model
+                    measured <strong>48.0% Precision@20</strong> and
+                    <strong>46.8% Precision@50</strong>, compared with
+                    <strong>36.0%</strong> and <strong>36.4%</strong> for the
+                    baseline.
+                </p>
+
+                <p>
+                    The result is a practical decision-support workflow:
+                    rank pages, identify what deserves attention first, and keep
+                    human review in the loop.
+                </p>
+
+                <p>
+                    Built on the FlyRank ML Internship dataset.
+                </p>
+            </section>
+
+            <section class="card" id="employer-summary" aria-labelledby="employer-summary-h">
+                <span class="copy-note">For recruiters &amp; hiring managers</span>
+                <h2 id="employer-summary-h">ML-12 — Employer-Facing Summary</h2>
+
+                <p>
+                    I built an end-to-end machine-learning workflow that ranks content
+                    pages for human review using March 2026 performance signals and
+                    content age.
+                </p>
+
+                <p>
+                    I compared Logistic Regression against a rule-based Week-4
+                    baseline using 5-fold client-grouped validation, achieving
+                    48.0% Precision@20 and 46.8% Precision@50 versus 36.0% and 36.4%
+                    for the baseline.
+                </p>
+
+                <p>
+                    The project demonstrates practical ML decision support with
+                    leakage controls, validation, ranked recommendations, public-safe
+                    reporting, and honest limitations.
+                </p>
+            </section>
+        </div>
+
+    </main>
+</div>
+
+<footer class="footer">
+    <p>
+        FlyRank ML Internship Capstone · Machine Learning · 2026
+    </p>
+
+    <p>
+        <a href="https://github.com/lakeshkumarkhatri/flyrank-ml"
+           target="_blank">
+            GitHub Repository
+        </a>
+        ·
+        <a href="https://flyrank.ai"
+           target="_blank">
+            FlyRank
+        </a>
+    </p>
+</footer>
+
+</body>
+</html>
