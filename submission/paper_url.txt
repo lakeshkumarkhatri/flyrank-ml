@@ -1,1 +1,1 @@
-PASTE-YOUR-DEPLOYED-PAPER-URL-HERE
+https://lakeshkumarkhatri.github.io/flyrank-ml/
